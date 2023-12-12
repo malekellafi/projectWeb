@@ -7,7 +7,7 @@ require_once '../../Model/Reclamation.php' ;
 
 $reclamationC = new ReclamationC(); 
 
-$reclamations=$reclamationC->getAllReclamations();
+$reclamations=$reclamationC->getAllReclamations1();
 $reponseC = new reponseC();
 
 $reponses = $reponseC->getAllreponses();

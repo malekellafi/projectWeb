@@ -2,11 +2,43 @@
 
 require_once   '../../Controller/ReclamationC.php';
 
-$ReclamationC = new ReclamationC();
+$reclamationC = new ReclamationC();
 
-$reclamations = $ReclamationC->getAllReclamations();
+if (isset($_POST['search'])) {
+    $reclamations = $reclamationC->searchReclamation($_POST['search']);
+    $pages=0;
+} else {
+    require_once('../../config.php');
+    $config = config::getConnexion();
 
+    $requete = "SELECT COUNT(*) AS total FROM reclamation";
+    $query = $config->prepare($requete);
+    $query->execute();
+    $result = $query->fetch();
+    $nbPages = (int) $result['total'];
+    $parPage = 4;
+    $pages = ceil($nbPages / $parPage);
 
+    if (isset($_GET['page']) && !empty($_GET['page'])) {
+        $currentPage = (int) $_GET['page'];
+        if ($currentPage < 1) {
+            $currentPage = 1;
+        } elseif ($currentPage > $pages) {
+            $currentPage = $pages;
+        }
+    } else {
+        $currentPage = 1;
+    }
+
+    $premier = ($currentPage - 1) * $parPage;
+
+    $requete = "SELECT * FROM reclamation ORDER BY country DESC LIMIT :premier, :parpage";
+    $query = $config->prepare($requete);
+    $query->bindValue(':premier', $premier, PDO::PARAM_INT);
+    $query->bindValue(':parpage', $parPage, PDO::PARAM_INT);
+    $query->execute();
+    $reclamations = $query->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 
 <!DOCTYPE html>
@@ -53,6 +85,7 @@ $reclamations = $ReclamationC->getAllReclamations();
                 <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                     <div class="sb-sidenav-menu">
                         <div class="nav">
+                       
                             <div class="sb-sidenav-menu-heading">Gestions</div>
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
                                 <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
@@ -113,31 +146,79 @@ $reclamations = $ReclamationC->getAllReclamations();
                             <button class="btn btn-sm btn-primary" type="submit" name="searchbtn">search</button>
                         </form>
                     </div>
+                    
                     <div class="table-responsive">
                         <table class="table text-start align-middle table-bordered table-hover mb-0">
                             <div class="container mt-5">
                                 <h2>Liste des Reclamations</h2>
 
-                               
-                                    <table class="table table-bordered">
-                                    
-                                        <tbody>
-                                            <?php foreach ($reclamations as $reclamation) {
-                                          
-                                            ?>
-                                                <tr>
-                  
-                                                    <td><?php echo $reclamation['firstName']; ?></td>
-                                                    <td><?php echo $reclamation['lastName']; ?></td>
-                                                    <td><?php echo $reclamation['country']; ?></td>
-                                                    <td><?php echo $reclamation['subject']; ?></td>
 
-                                                    <td>
-                                                        <a href="SupprimerReclamation.php?id=<?php echo $reclamation['id']; ?>" class="btn btn-danger btn-sm">Supprimer</a>
-                                                        <a href="AjouterReponse.php?reclamation=<?php echo urlencode($reclamation['firstName']); ?>" class="btn btn-success btn-sm">Répondre</a>                                            <?php } ?>
-                                        </tbody>
-                                    </table>
+                                <tr>      
+                                <td><h3 class="box-title">Reclamtions</h3></td>
 
+                                <form method="POST">
+                                    <input type="text" name="search" placeholder="search for reclamation">
+                                    <button class="btn btn-sm btn-primary" type="submit" name="searchbtn">Rechercher Reclamation</button>
+                                </form>
+                                </tr>
+
+                                <br>
+                                <style>
+    .fixed-width-button {
+        width: 150px; /* Ajustez la largeur selon vos besoins */
+    }
+</style>
+
+<div class="form-input pt-30">
+    <form action="triFirstName.php" method="post">
+        <button type="submit" name="submit" class="btn btn-danger btn-sm fixed-width-button">Sort By FirstName</button>
+    </form>
+</div>
+<br>
+<div class="form-input pt-30">
+    <form action="triLastName.php" method="post">
+        <button type="submit" name="submit" class="btn btn-success btn-sm fixed-width-button">Sort By LastName</button>
+    </form>
+</div>
+<br>
+
+<div class="form-input pt-30">
+    <form action="triCountry.php" method="post">
+        <button type="submit" name="submit" class="btn btn-danger btn-sm fixed-width-button">Sort By Country</button>
+    </form>
+</div>
+<table class="table table-bordered">
+    <tbody>
+        <?php foreach ($reclamations as $reclamation) { ?>
+            <tr>
+                <td><?php echo $reclamation['firstName']; ?></td>
+                <td><?php echo $reclamation['lastName']; ?></td>
+                <td><?php echo $reclamation['country']; ?></td>
+                <td><?php echo $reclamation['subject']; ?></td>
+                <td>
+                    <a href="SupprimerReclamation.php?id=<?php echo $reclamation['id']; ?>" class="btn btn-danger btn-sm">Supprimer</a>
+                    <a href="AjouterReponse.php?reclamation=<?php echo urlencode($reclamation['firstName']); ?>" class="btn btn-success btn-sm">Répondre</a>
+                </td>
+            </tr>
+        <?php } ?>
+    </tbody>
+</table>
+
+<nav>
+    <ul class="pagination">
+        <li class="page-item <?= ($currentPage == 1) ? "disabled" : "" ?>">
+            <a href="reclamations.php?page=<?= $currentPage - 1 ?>" class="page-link">Précédente</a>
+        </li>
+        <?php for ($page = 1; $page <= $pages; $page++) { ?>
+            <li class="page-item <?= ($currentPage == $page) ? "active" : "" ?>">
+                <a href="reclamations.php?page=<?= $page ?>" class="page-link"><?= $page ?></a>
+            </li>
+        <?php } ?>
+        <li class="page-item <?= ($currentPage == $pages) ? "disabled" : "" ?>">
+            <a href="reclamations.php?page=<?= $currentPage + 1 ?>" class="page-link">Suivante</a>
+        </li>
+    </ul>
+</nav>
 
                             </div>
                         </table>

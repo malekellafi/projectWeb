@@ -84,7 +84,7 @@ https://www.tooplate.com/view/2127-little-fashion
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="Reponses.php">Inbox</a>
+                                <a class="nav-link" href="Reclamations.php">Inbox</a>
                             </li>
 
                             <li class="nav-item">

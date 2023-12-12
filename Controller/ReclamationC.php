@@ -7,17 +7,48 @@ require_once "../../Model/Reclamation.php";
 
 Class ReclamationC {
 
-    function getAllReclamations()
+
+    function getTotalReclamations()
     {
-        $requete = "select * from reclamation";
+        $requete = "SELECT COUNT(*) AS total FROM reclamation";
+        $config = config::getConnexion();
+        try {
+            $querry = $config->prepare($requete);
+            $querry->execute();
+            $result = $querry->fetch();
+           
+        } catch (PDOException $th) {
+            $th->getMessage();
+        }
+        return $result['total'];
+    }
+
+    function getAllReclamations1()
+    {
+        $requete = "SELECT * FROM reclamation";
         $config = config::getConnexion();
         try {
             $querry = $config->prepare($requete);
             $querry->execute();
             $result = $querry->fetchAll();
-            return $result ;
+            return $result;
         } catch (PDOException $th) {
-             $th->getMessage();
+            $th->getMessage();
+        }
+    }
+    function getAllReclamations($page)
+    {
+        $offset = ($page - 1) * 4;
+        $requete = "SELECT * FROM reclamation LIMIT 4 OFFSET :offset";
+        $config = config::getConnexion();
+        try {
+            $querry = $config->prepare($requete);
+            $querry->bindParam(':offset', $offset, PDO::PARAM_INT);
+            $querry->execute();
+            $result = $querry->fetchAll();
+            return $result;
+        } catch (PDOException $th) {
+            $th->getMessage();
         }
     }
 
@@ -67,6 +98,8 @@ Class ReclamationC {
     }
 
     
+
+    
     function getreclamationbyID($id)
     {
         $requete = "select * from reclamation where id=:id";
@@ -102,10 +135,59 @@ Class ReclamationC {
              $th->getMessage();
         }
     }
-   
-    
-           
 
+
+    function trierLn()
+{
+    $sql = "SELECT * from reclamation ORDER BY lastName ASC";
+    $db = config::getConnexion();
+    try {
+        $req = $db->query($sql);
+        return $req;
+    } catch (Exception $e)
+    {
+        die('Erreur: ' . $e->getMessage());
+    }
+}
+
+function trierCountry()
+{
+    $sql = "SELECT * from reclamation ORDER BY country ASC";
+    $db = config::getConnexion();
+    try {
+        $req = $db->query($sql);
+        return $req;
+    } catch (Exception $e)
+    {
+        die('Erreur: ' . $e->getMessage());
+    }
+}
+function trierFn()
+{
+    $sql = "SELECT * from reclamation ORDER BY firstName ASC";
+    $db = config::getConnexion();   
+    try {
+        $req = $db->query($sql);
+        return $req;
+    } catch (Exception $e)
+    {
+        die('Erreur: ' . $e->getMessage());
+    }
+}
+
+function searchReclamation($sh)
+{
+    $requete = "select * from reclamation where (firstName like '%$sh%' or lastName like '%$sh%') ";
+    $config = config::getConnexion();
+    try {
+        $querry = $config->prepare($requete);
+        $querry->execute();
+        $result = $querry->fetchAll();
+        return $result ;
+    } catch (PDOException $th) {
+        $th->getMessage();
+    }
+}
            
     
 }

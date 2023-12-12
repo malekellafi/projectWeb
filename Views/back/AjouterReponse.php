@@ -7,7 +7,7 @@
 
          
     $reclamationC = new ReclamationC();
-    $reclamations = $reclamationC->getAllReclamations();  
+    $reclamations = $reclamationC->getAllReclamations1();  
     $nomReclamation = $_GET['reclamation'];
     
     if (isset($_POST['mail'] ) && isset($_POST['message'] ) && isset($_POST['reclamation'] ) ) 
@@ -16,7 +16,7 @@
                 $reponse = new Reponse(0,$_POST['mail'] ,$_POST['message'],$_POST['reclamation']);
                 $reponseC = new reponseC();
                 $reponseC->ajouterReponse($reponse);
-                header("Location:Reponses.php");
+                header("Location:sendMail.php?mail=".$_POST['mail']."&reclamation=".$_POST['reclamation']);
     } 
 
 ?>
@@ -124,7 +124,12 @@
                 <div class="row g-4">
                     <div class="col-sm-12 col-xl-6">
                         <div class="bg-light rounded h-100 p-4">
-                        <form action="" id="form" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+
+
+
+                        
+
+                        <form action="" id="form" method="POST" enctype="multipart/form-data" >
     <label for="reclamation">Sélectionnez une réclamation :</label>
     <select name="reclamation" id="reclamation">
     <?php foreach ($reclamations as $reclamation) : ?>
@@ -136,7 +141,7 @@
 
     <div class="mb-3">
         <label for="mail" class="form-label">Mail</label>
-        <input type="email" class="form-control" id="mail" name="mail" required>
+        <input type="email" class="form-control" id="mail" name="mail"   required  >
     </div>
 
     <div class="mb-3">
@@ -178,35 +183,77 @@
 
 
         <script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Fonction de validation du formulaire
     function validateForm() {
-        var reclamation = document.getElementById("reclamation").value;
-        var mail = document.getElementById("mail").value;
+        // Récupérer les champs du formulaire
+        var emailDest = document.getElementById("mail").value;
         var message = document.getElementById("message").value;
+        var reclamation = document.getElementById("reclamation").value;
 
-        if (reclamation === "") {
-            alert("Veuillez sélectionner une réclamation.");
+        // Réinitialiser les messages d'erreur
+        document.getElementById("error-email").innerText = "";
+        document.getElementById("error-message").innerText = "";
+        document.getElementById("error-reclamation").innerText = "";
+
+        // Valider le champ email
+        if (emailDest.trim() === "") {
+            document.getElementById("error-email").innerText = "Veuillez entrer une adresse e-mail.";
+            return false;
+        } var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailDest)) {
+            document.getElementById("error-email").innerText = "Veuillez entrer une adresse e-mail valide.";
             return false;
         }
 
-        if (!/^.+@.+\.(com|tn)$/.test(mail)) {
-    alert("Le champ email doit être au format valide (exemple@domaine.com ou exemple@domaine.tn).");
-    return false;
-}
+        // Valider le champ message
+        if (message.trim() === "") {
+            document.getElementById("error-message").innerText = "Veuillez entrer un message.";
+            return false;
+        }
 
-        // Vous pouvez ajouter d'autres validations selon vos besoins
+        // Valider le champ réclamation
+        if (reclamation === "") {
+            document.getElementById("error-reclamation").innerText = "Veuillez sélectionner une réclamation.";
+            return false;
+        }
 
-        return true; // Si toutes les validations sont réussies, le formulaire est soumis
+        // Si toutes les validations sont réussies
+        return true;
     }
+
+    // Ajouter un gestionnaire d'événements pour le formulaire
+    document.getElementById("form").addEventListener("submit", function (event) {
+        // Annuler la soumission du formulaire si la validation échoue
+        if (!validateForm()) {
+            event.preventDefault();
+        }
+    });
+});
 </script>
 
 <script>
 function remplirChampReclamation() {
-  var nomReclamation = "Nom de la réclamation"; // Remplacez "Nom de la réclamation" par le nom réel de la réclamation
-
+  var nomReclamation = "Nom de la réclamation";
   var champReclamation = document.getElementById('reclamation');
 
   champReclamation.value = nomReclamation;
 }
+    // Get the select element
+    var selectReclamation = document.getElementById('reclamation');
+
+    // Get the email input element
+    var emailInput = document.getElementById('mail');
+
+    // Add an event listener to the select element
+    selectReclamation.addEventListener('change', function() {
+        // Get the selected option
+        var selectedOption = selectReclamation.options[selectReclamation.selectedIndex];
+
+        // Update the email input value with the data-email attribute of the selected option
+        emailInput.value = selectedOption.getAttribute('data-email');
+
+    });
 </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
         <script src="js/scripts.js"></script>

@@ -135,6 +135,13 @@ $reponses = $reponseC->getAllreponses();
                                                         <a href="ModifierReponse.php?id_rep=<?php echo $reponse['id_rep']; ?>" class="btn btn-success btn-sm">Modifier</a>
 
                                                     </td>
+
+                                                    <td>
+                <form action="sms.php" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to send this event');">
+                    <input type="hidden" name="id_rep" value="<?= $reponse['id_rep'] ?>">
+                    <button type="submit" >SMS</button>
+                </form>
+            </td>
                                                 </tr>
                                             <?php } ?>
                                         </tbody>

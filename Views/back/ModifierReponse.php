@@ -6,7 +6,7 @@
 
             
     $reclamationC = new ReclamationC();
-    $reclamations = $reclamationC->getAllReclamations();  
+    $reclamations = $reclamationC->getAllReclamations1();  
 
     if (isset($_GET['id_rep'])) {
         $reponseC = new reponseC();
@@ -189,9 +189,8 @@
     return false;
 }
 
-        // Vous pouvez ajouter d'autres validations selon vos besoins
-
-        return true; // Si toutes les validations sont réussies, le formulaire est soumis
+       
+        return true; 
     }
 </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
